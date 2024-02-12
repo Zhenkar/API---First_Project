@@ -4,6 +4,9 @@ from flask_smorest import Blueprint , abort
 from flask.views import MethodView
 from variables import store
 
+from schema import Storevalidate
+
+
 blp = Blueprint("store",__name__, description = "Operations on store")
 
 
@@ -29,9 +32,8 @@ class Store_new(MethodView):
     def get(self):                                                                      #get all stores
         return {"stores" : list(store.values())}
 
-
-    def post(self):                                                                     #insert_new_store 
-        store_data = request.get_json()
+    @blp.arguments(Storevalidate)
+    def post(self, store_data):                                                         #insert_new_store , the Storevalidate will return a dict so no need for store_data = request.get_json()
     
         if ("name" not in store_data):
             abort(400 , message = "You must add name variable inside the request")
