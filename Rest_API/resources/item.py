@@ -4,7 +4,6 @@ from flask_smorest import Blueprint , abort
 from flask.views import MethodView
 from variables import items , store
 
-
 from schema import Itemsvalidate , ItemsUpdate
 
 
@@ -14,7 +13,9 @@ blp = Blueprint("Items" , __name__ , description = "Operations on Item")
 
 @blp.route("/items/<string:item_id>")
 class Item(MethodView):
-    def get(self, item_id):                                                                 # get_specific_item
+
+    @blp.response(200 , Itemsvalidate)                                                      # this line @blp.response uses scheme that we defined and show the values that are defined in the scheme , you define with status code what message you want
+    def get(self, item_id):                                                                 # get_specific_item                                                              
         try:
             return items[item_id]
         except KeyError:
@@ -28,8 +29,10 @@ class Item(MethodView):
             abort(404 , message = " item not found")
 
 
-    blp.arguments(ItemsUpdate)
-    def put(self, request_data , item_id):                                                                 # update_item , the request_data shoule be first because its the rule for arguments keyword                              
+    #order of argument and response matters
+    @blp.arguments(ItemsUpdate)                 
+    @blp.response(200 , Itemsvalidate)
+    def put(self, request_data , item_id):                                                  # update_item , the request_data shoule be first because its the rule for arguments keyword                              
         request_data = request.get_json()
         if "name" not in request_data or "price" not in request_data:
             abort(400 , message = "You must inlude name and price inside the json")
@@ -45,11 +48,18 @@ class Item(MethodView):
 
 @blp.route("/items")
 class Items_new(MethodView):
+
+
+    #the above schemas were for sinle item , for multiple items 
+    @blp.response(200 , Itemsvalidate(many = True))
     def get(self):
-        return {"items" : list(items.values())}
+        #before return {"items" : list(items.values())}
+        #after schema -  no need for converting the dict to list as the marsmello does it for us
+        return items.values()   
     
 
     @blp.arguments(Itemsvalidate)                                                                       # this line is making sure that the json text contains all the necessary fields mentioned in the schema , and returns a dcitonary (in our case request_data) no need for request_dat = reqest.get_json()
+    @blp.response(Itemsvalidate)
     def post(self, request_data):                                                                       # create a new item
  
 

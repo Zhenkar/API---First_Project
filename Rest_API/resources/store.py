@@ -12,6 +12,8 @@ blp = Blueprint("store",__name__, description = "Operations on store")
 
 @blp.route("/store/<string:store_id>")
 class Store(MethodView):
+
+    @blp.response(200 , Storevalidate)
     def get(self,store_id):                                                             #get particular store
         try:
             return store[store_id]
@@ -29,9 +31,13 @@ class Store(MethodView):
 @blp.route("/store")
 class Store_new(MethodView):
 
+    @blp.response(200,Storevalidate(many = True))
     def get(self):                                                                      #get all stores
-        return {"stores" : list(store.values())}
+        #before -> return {"stores" : list(store.values())}
+        store.values()
 
+    
+    @blp.response(201 , Storevalidate)
     @blp.arguments(Storevalidate)
     def post(self, store_data):                                                         #insert_new_store , the Storevalidate will return a dict so no need for store_data = request.get_json()
     
