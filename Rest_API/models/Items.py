@@ -1,3 +1,5 @@
+# Models folder came into picture after the marshmello(schema) , for sqlalchemy
+
 from variables import variables
 
 class ItemModel(variables.Model):
@@ -8,3 +10,4 @@ class ItemModel(variables.Model):
     name = variables.Column(variables.String(50) , uniqe = True ,nullable = False)
     price = variables.Column(variables.Float , unique = False , nullable = False)
     store_id = variables.Column(variables.Integer ,variables.ForeignKey("store.id")  , unique= True , nullables = False)  # Foregin key - tablename . column name (id)
+    store = variables.relationship("StoreModel" , back_populate = "items")
