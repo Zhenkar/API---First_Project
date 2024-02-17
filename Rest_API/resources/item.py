@@ -1,8 +1,8 @@
 import uuid 
-from flask import request
+#from flask import request
 from flask_smorest import Blueprint , abort
 from flask.views import MethodView
-from variables import items , store
+#from variables import items , store
 
 from schema import Itemsvalidate , ItemsUpdate
 
@@ -19,7 +19,7 @@ class Item(MethodView):
         try:
             return items[item_id]
         except KeyError:
-            abort(404 , message = "item not found")
+            abort(404, message="item not found")
 
     def delete(self, item_id):                                                              # delete_item
         try:
@@ -50,7 +50,7 @@ class Item(MethodView):
 class Items_new(MethodView):
 
 
-    #the above schemas were for sinle item , for multiple items 
+    #the above schemas were for single item, but for multiple items 
     @blp.response(200 , Itemsvalidate(many = True))
     def get(self):
         #before return {"items" : list(items.values())}
@@ -59,7 +59,7 @@ class Items_new(MethodView):
     
 
     @blp.arguments(Itemsvalidate)                                                                       # this line is making sure that the json text contains all the necessary fields mentioned in the schema , and returns a dcitonary (in our case request_data) no need for request_dat = reqest.get_json()
-    @blp.response(Itemsvalidate)
+    @blp.response(201,Itemsvalidate)
     def post(self, request_data):                                                                       # create a new item
  
 
