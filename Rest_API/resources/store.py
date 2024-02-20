@@ -2,9 +2,14 @@ import uuid
 from flask import request
 from flask_smorest import Blueprint , abort
 from flask.views import MethodView
-#from variables import store
 
+#for validation using marshmallow
 from schema import Storevalidate
+
+#importing the table, sql object , error handler for sqlalchemy
+from models import StoreModel
+from variables import variables
+from sqlalchemy.exc import SQLAlchemyError
 
 
 blp = Blueprint("store",__name__, description = "Operations on store")
@@ -15,18 +20,12 @@ class Store(MethodView):
 
     @blp.response(200 , Storevalidate)
     def get(self,store_id):                                                             #get particular store
-        try:
-            return store[store_id]
-        except KeyError:
-            abort(404 , message = "store not found")
-    
+        store = StoreModel.query.get_or_404(store_id)
+        return store
 
     def delete(self , store_id):                                                        #delete a particular store
-        try:
-            del store[store_id]
-            return {"message" : "store deleted"}
-        except KeyError:
-            abort(404 , message = " store not found")
+        store = StoreModel.query.get_or_404(store_id)
+        raise NotImplementedError("delete not implemented yet")
         
 @blp.route("/store")
 class Store_new(MethodView):
@@ -40,15 +39,13 @@ class Store_new(MethodView):
     @blp.response(201 , Storevalidate)
     @blp.arguments(Storevalidate)
     def post(self, store_data):                                                         #insert_new_store , the Storevalidate will return a dict so no need for store_data = request.get_json()
-    
-        if ("name" not in store_data):
-            abort(400 , message = "You must add name variable inside the request")
-
-        for i in store.values():
-            if ( store_data["name"] == i["name"]):
-                abort(400, message = "The store already exist")
-
-        store_id = uuid.uuid4().hex 
-        new_data = {**store_data , "store_id":store_id}
-        store[store_id ] = new_data
-        return new_data , 201
+        store = StoreModel(**store_data)
+        try:
+            variables.session.add(store)
+            variables.session.commit()
+        except IntegrityError:
+            abort (400, message="A store with the same name already exists")
+        except SQLAlchemyError:
+            abort (500 , message="Something went wrong while createing the store")
+        
+        return store 

@@ -4,7 +4,7 @@ class StoreModel(variables.Model):
     __tablename__= "stores"
 
     id = variables.Column(variables.Integer, primary_key = True)
-    name = variables.Column(variables.String(80) , nullable = False)
+    name = variables.Column(variables.String(80) ,unique=True,  nullable = False)
 
     items = variables.relationship("ItemModel" , back_populates="stores" , lazy="dynamic")
 
