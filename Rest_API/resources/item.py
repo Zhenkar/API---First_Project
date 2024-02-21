@@ -33,8 +33,17 @@ class Item(MethodView):
     @blp.arguments(ItemsUpdate)                 
     @blp.response(200 , Itemsvalidate)
     def put(self, request_data , item_id):                                                  # update_item , the request_data shoule be first because its the rule for arguments keyword                              
-        item = ItemModel.query.get_or_404(item_id)
-        raise NotImplementedError("put still not implemented")
+        item = ItemModel.query.get(item_id) 
+        if item:
+            item.name = request_data["name"]
+            item.price = request_data["price"]
+        else:
+            item = ItemModel(id = item_id ,**request_data)
+        variables.session.add(item)
+        variables.session.commit()
+        return item
+        
+        
 
 
 

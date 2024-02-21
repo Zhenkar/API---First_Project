@@ -8,7 +8,7 @@ class PlainItemsvalidate(Schema):
 
 
 class PlainStorevalidate(Schema):
-    id = fields.Str(dump_only = True)
+    id = fields.Int(dump_only = True)
     name = fields.Str(required = True)
 
 class ItemsUpdate(Schema):
@@ -16,7 +16,7 @@ class ItemsUpdate(Schema):
     price = fields.Float()
 
 class Itemsvalidate(PlainItemsvalidate):
-    store_id = fields.Int(requreied="True" , load_only=True)
+    store_id = fields.Int(requreied= True , load_only=True)
     store = fields.Nested(PlainStorevalidate() , dump_only=True)                        # Schemas can be nested to represent relationships between objects (e.g. foreign key relationships)
 
 class Storevalidate(PlainStorevalidate):
