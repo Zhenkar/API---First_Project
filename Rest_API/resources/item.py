@@ -61,7 +61,7 @@ class Items_new(MethodView):
     @blp.arguments(Itemsvalidate)                                                           # this line is making sure that the json text contains all the necessary fields mentioned in the schema , and returns a dcitonary (in our case request_data) no need for request_dat = reqest.get_json()
     @blp.response(201,Itemsvalidate)
     def post(self, request_data):                                              
-        item = ItemModel(**request_data)                                                    #I am referencing item table through the ItemModel class, **request_data says that the dictionary value which I will receive will be seperated as variable & value respectively with the table columns defined in the item table 
+        item = ItemModel(**request_data)                                                    #Object/Instance of ItemModel class, **request_data says that the dictionary value which I will receive will be seperated as variable & value respectively with the table columns defined in the item table 
 
         try:
             variables.session.add(item)
