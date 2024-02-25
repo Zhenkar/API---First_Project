@@ -11,8 +11,8 @@ class PlainStorevalidate(Schema):
     name = fields.Str(required = True)
 
 class PlainTagvalidate(Schema):
-    tag_id = fields.Int(dump_only = True)
-    tag_name = fields.Str()# required is not there , why?
+    id = fields.Int(dump_only = True)
+    name = fields.Str()# required is not there , why?
 
 
 class ItemsUpdate(Schema):
@@ -23,16 +23,21 @@ class ItemsUpdate(Schema):
 class Itemsvalidate(PlainItemsvalidate):
     store_id = fields.Int(requreied= True , load_only=True)                              #load only means the it can take store_id from the user. You cannot use it for sending the data to the client.
     store = fields.Nested(PlainStorevalidate() , dump_only=True)                        # Nested because, I am saying marshmallow that this(store, inside the Itemsvalidate class) variable has a relationship with the sotrevalidate class to get the store_id data
+    tags = fields.List(fields.Nested(PlainTagvalidate()) , dump_only = True)
 
 class Storevalidate(PlainStorevalidate):
     items = fields.List(fields.Nested(PlainItemsvalidate()),dump_only=True)            # I know that item variable in the StoreModel class will get me all the items connected to this particaluar store, so there will be a list of them, that's why fields.list()
-    tags = fields.List(fields.Nested("PlainTagvalidate") , dump_only = True)
+    tags = fields.List(fields.Nested(PlainTagvalidate()) , dump_only = True)
                                                                                        # fields.List(fields.Nested(PlainItemsvalidate())) , nested because there is a relationship between StoreModel and  Itemvalidat(ItemModel) for getting all the data connected to that particular store 
 class Tagvalidate(PlainTagvalidate):
-    store_id = fields.Int( load_only = True)# required is not there why?
-    store = fields.Nested("PlainTagvalidate", dump_only = True)
+    store_id = fields.Int( load_only = True)
+    store = fields.Nested(PlainStorevalidate(), dump_only = True)
+    items = fields.List(fields.Nested(PlainItemsvalidate()) , dump_only = True)
 
-
+class TagItemvalidate(Schema):
+    message = fields.Str()
+    item = fields.Nested(Itemsvalidate)
+    tag = fields.Nested(Tagvalidate)
 
 
 # The plainItemvalidate and plainStorevalidt is there because there is no nesting fields present and thus does not lead to recursive call of the nested fields between the item and the store

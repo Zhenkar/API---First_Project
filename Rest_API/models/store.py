@@ -1,5 +1,7 @@
 from variables import variables
 
+# to make it one to many relationship( between store and item ), the store dosen't have a item_id column, if it had then you'd have to insert a store to a particular item id.
+# you could have made it many to many relationship if you have item_id as a foregin key and making unique to false. By making this you could make multiple stores with the same item_id and they'd fall in that item
 class StoreModel(variables.Model):
     __tablename__= "stores"
 

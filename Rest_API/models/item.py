@@ -12,6 +12,6 @@ class ItemModel(variables.Model):
 
     store_id = variables.Column(variables.Integer ,variables.ForeignKey("stores.id")  , unique= False , nullable = False)  # Foregin key - tablename . column name (id)
 
-    # relationship("classname of the class you want to reference", backref/back_populate - means creating a new column item in [that class table which is->] the store tabel)
-    # new explination in the book.
+    # explination in the paper.
     store = variables.relationship("StoreModel" , back_populates = "items")
+    tags = variables.relationship("TagsModel", back_populates="items" , secondary="tag_item")
