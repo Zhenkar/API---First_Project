@@ -47,12 +47,12 @@ class LinkTagToItem(MethodView):
             variables.session.add(item)
             variables.session.commit()
         except SQLAlchemyError:
-            abort(500 , message="Someting went wrong in linkink the tag to item section")
+            abort(500 , message="Someting went wrong in linking the tag to item section")
 
         return tag
 
     @blp.response(200, TagItemvalidate)
-    def delete(self , item_id , tag_id):
+    def delete(self , item_id , tag_id):# Unlinking the item and tag realtionship
         item = ItemModel.query.get_or_404(item_id)
         tag = TagsModel.query.get_or_404(tag_id)
 
@@ -84,3 +84,11 @@ class Tags2(MethodView):
             variables.session.commit()
             return {"message" : "Tag successfully deleted"}
         abort(400 , message="Could not delete tag as it had items attached to it")
+
+@blp.route("/tag")
+class Tags3(MethodView):
+    @blp.response(200,Tagvalidate(many=True))  #It iterates through all of the tags and return each object , so many = True is a must   
+    def get(self):  
+        tags = TagsModel.query.all()
+
+        return tags

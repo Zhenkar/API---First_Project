@@ -40,5 +40,3 @@ class TagItemvalidate(Schema):
     tag = fields.Nested(Tagvalidate)
 
 
-# The plainItemvalidate and plainStorevalidt is there because there is no nesting fields present and thus does not lead to recursive call of the nested fields between the item and the store
-#

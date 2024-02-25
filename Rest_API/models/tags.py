@@ -1,7 +1,7 @@
 from variables import variables
 
 class TagsModel(variables.Model):
-    __name__ = "tag"
+    __tablename__ = "tag"
 
     id = variables.Column(variables.Integer , primary_key = True)
     name = variables.Column(variables.String , unique = True , nullable = False)
