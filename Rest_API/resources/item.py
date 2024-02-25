@@ -7,7 +7,7 @@ from schema import Itemsvalidate , ItemsUpdate
 
 #for sql alchemy - database object and sqlalchemy error
 from variables import variables
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError , IntegrityError
 from models import ItemModel
 
 
@@ -20,13 +20,16 @@ class Item(MethodView):
 
     @blp.response(200 , Itemsvalidate)                                                      # this line @blp.response uses scheme that we defined and show the values that are defined in the scheme , you define with status code what message you want
     def get(self, item_id):                                                                                                                              
-        item = ItemModel.query.get_or_404(item_id)
+        item = ItemModel.query.get_or_404(item_id)                                          # ItemModel.query function is flask-sqlalchemy exclusive only, you won't get it in normal sqlalchemy 
+                                                                                            # query takes only the ""primary key""" value form the request and search the database , if not found it'll return 404 error
         return item
 
 
     def delete(self, item_id):                                                              
         item = ItemModel.query.get_or_404(item_id)
-        raise NotImplementedError("Delete still not implemented")
+        variables.session.delete(item)
+        variables.session.commit()
+        return {"message":"Item deleted successfully"}
 
 
     #order of argument and response matters
@@ -55,7 +58,7 @@ class Items_new(MethodView):
     #the above schemas were for single item, but for multiple items 
     @blp.response(200 , Itemsvalidate(many = True))
     def get(self):
-        return items.values()   
+        return ItemModel.query.all()
     
 
     @blp.arguments(Itemsvalidate)                                                           # this line is making sure that the json text contains all the necessary fields mentioned in the schema , and returns a dcitonary (in our case request_data) no need for request_dat = reqest.get_json()
@@ -66,6 +69,10 @@ class Items_new(MethodView):
         try:
             variables.session.add(item)
             variables.session.commit()
+        
+        except IntegrityError:
+            abort (400, message="A Item with the same name already exists")
+
         except SQLAlchemyError:
             abort ( 500 , message = " Someting went wrong while inserting the data ")
 

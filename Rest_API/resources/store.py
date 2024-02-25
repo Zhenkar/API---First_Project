@@ -9,7 +9,7 @@ from schema import Storevalidate
 #importing the table, sql object , error handler for sqlalchemy
 from models import StoreModel
 from variables import variables
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError , IntegrityError
 
 
 blp = Blueprint("store",__name__, description = "Operations on store")
@@ -25,15 +25,16 @@ class Store(MethodView):
 
     def delete(self , store_id):                                                        #delete a particular store
         store = StoreModel.query.get_or_404(store_id)
-        raise NotImplementedError("delete not implemented yet")
+        variables.session.delete(store)
+        variables.session.commit()
+        return {"message" : "Store deleted successfully"}
         
 @blp.route("/store")
 class Store_new(MethodView):
 
     @blp.response(200,Storevalidate(many = True))
     def get(self):                                                                      #get all stores
-        #before -> return {"stores" : list(store.values())}
-        store.values()
+        return StoreModel.query.all()
 
     
     @blp.response(201 , Storevalidate)
