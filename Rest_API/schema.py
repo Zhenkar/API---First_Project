@@ -39,4 +39,9 @@ class TagItemvalidate(Schema):
     item = fields.Nested(Itemsvalidate)
     tag = fields.Nested(Tagvalidate)
 
+class Uservalidate(Schema):
+    id = fields.Int(dump_only = True)
+    name = fields.Str(required=True)
+    password = fields.Str(load_only= True)
+    
 

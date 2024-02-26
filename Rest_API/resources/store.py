@@ -1,7 +1,6 @@
-import uuid 
-from flask import request
 from flask_smorest import Blueprint , abort
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required
 
 #for validation using marshmallow
 from schema import Storevalidate
@@ -15,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError , IntegrityError
 blp = Blueprint("store",__name__, description = "Operations on store")
 
 
-@blp.route("/store/<string:store_id>")
+@blp.route("/store/<int:store_id>")
 class Store(MethodView):
 
     @blp.response(200 , Storevalidate)
@@ -23,11 +22,28 @@ class Store(MethodView):
         store = StoreModel.query.get_or_404(store_id)
         return store
 
+    @jwt_required()
     def delete(self , store_id):                                                        #delete a particular store
         store = StoreModel.query.get_or_404(store_id)
         variables.session.delete(store)
         variables.session.commit()
         return {"message" : "Store deleted successfully"}
+    
+    @blp.arguments(Storevalidate)
+    @blp.response(200,Storevalidate)
+    def put(self , store_data ,store_id):
+        store = StoreModel.query.get(store_id)  
+
+        if store:
+            store.name = store_data["name"]
+        else:
+            store = StoreModel(id = store_id ,**store_data)
+
+        variables.session.add(store)
+        variables.session.commit()
+        return store
+
+        
         
 @blp.route("/store")
 class Store_new(MethodView):
@@ -36,7 +52,7 @@ class Store_new(MethodView):
     def get(self):                                                                      #get all stores
         return StoreModel.query.all()
 
-    
+    @jwt_required()
     @blp.response(201 , Storevalidate)
     @blp.arguments(Storevalidate)
     def post(self, store_data):                                                         #insert_new_store , the Storevalidate will return a dict so no need for store_data = request.get_json()

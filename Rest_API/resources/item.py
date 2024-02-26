@@ -1,6 +1,6 @@
-import uuid 
 from flask_smorest import Blueprint , abort
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required
 
 #for marshmallow validation of the data incoming and outgoing
 from schema import Itemsvalidate , ItemsUpdate
@@ -15,16 +15,17 @@ from models import ItemModel
 blp = Blueprint("Items" , __name__ , description = "Operations on Item")
 
 
-@blp.route("/items/<string:item_id>")
+@blp.route("/items/<int:item_id>") #string , int etc
 class Item(MethodView):
 
+    @jwt_required()
     @blp.response(200 , Itemsvalidate)                                                      # this line @blp.response uses scheme that we defined and show the values that are defined in the scheme , you define with status code what message you want
     def get(self, item_id):                                                                                                                              
         item = ItemModel.query.get_or_404(item_id)                                          # ItemModel.query function is flask-sqlalchemy exclusive only, you won't get it in normal sqlalchemy 
                                                                                             # query takes only the ""primary key""" value form the request and search the database , if not found it'll return 404 error
         return item
 
-
+    @jwt_required()
     def delete(self, item_id):                                                              
         item = ItemModel.query.get_or_404(item_id)
         variables.session.delete(item)
@@ -32,6 +33,7 @@ class Item(MethodView):
         return {"message":"Item deleted successfully"}
 
 
+    @jwt_required()
     #order of argument and response matters
     @blp.arguments(ItemsUpdate)                 
     @blp.response(200 , Itemsvalidate)
@@ -60,7 +62,8 @@ class Items_new(MethodView):
     def get(self):
         return ItemModel.query.all()
     
-
+    @jwt_required()
+    @blp.doc(description = "Testing doc")
     @blp.arguments(Itemsvalidate)                                                           # this line is making sure that the json text contains all the necessary fields mentioned in the schema , and returns a dcitonary (in our case request_data) no need for request_dat = reqest.get_json()
     @blp.response(201,Itemsvalidate)
     def post(self, request_data):                                              
@@ -77,3 +80,6 @@ class Items_new(MethodView):
             abort ( 500 , message = " Someting went wrong while inserting the data ")
 
         return item
+    
+
+

@@ -9,7 +9,7 @@ from schema import Tagvalidate , TagItemvalidate
 
 blp = Blueprint("Tags", __name__ , description = "Operation on Tags")
 
-@blp.route("/store/<string:store_id>/tag")
+@blp.route("/store/<int:store_id>/tag")
 class Tags(MethodView):
     
     @blp.response(200,Tagvalidate(many=True))
@@ -17,11 +17,12 @@ class Tags(MethodView):
         store = StoreModel.query.get_or_404(store_id)
         return store.tags.all()
 
-    @blp.response(200,Tagvalidate)
+    @blp.response(201,Tagvalidate)
     @blp.arguments(Tagvalidate)
     def post(self,tag_data , store_id):
         # You can also do this
-        # TagsModel.query.filter(TagsModel.store_id == "store_id" , TagsModel.name == tag_data["name"].first())
+        if TagsModel.query.filter(TagsModel.store_id == "store_id" , TagsModel.name == tag_data["name"]).first():
+            abort(400 , message = "A ta with that name aleready exists")
         tag = TagsModel(**tag_data , store_id = store_id)
         try:
             variables.session.add(tag)
@@ -34,9 +35,10 @@ class Tags(MethodView):
 
     
 
-@blp.route("/item/<string:item_id>/tag/<string:tag_id>")
+@blp.route("/item/<int:item_id>/tag/<int:tag_id>")
 class LinkTagToItem(MethodView):
-    @blp.response(201, TagItemvalidate)
+
+    @blp.response(201, Tagvalidate)
     def post(self, item_id , tag_id):            
         item = ItemModel.query.get_or_404(item_id)
         tag = TagsModel.query.get_or_404(tag_id)
@@ -68,7 +70,7 @@ class LinkTagToItem(MethodView):
 
 
 
-@blp.route("/tag/<string:tag_id>")
+@blp.route("/tag/<int:tag_id>")
 class Tags2(MethodView):
     @blp.response(200, Tagvalidate)
     def get(self,tag_id):
