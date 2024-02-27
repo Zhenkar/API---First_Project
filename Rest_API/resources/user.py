@@ -1,6 +1,6 @@
 from flask_smorest import Blueprint , abort
 from flask.views import MethodView
-from flask_jwt_extended import create_access_token , jwt_required , get_jwt
+from flask_jwt_extended import create_access_token ,create_refresh_token , get_jwt_identity , jwt_required , get_jwt
 from sqlalchemy.exc import SQLAlchemyError , IntegrityError 
 from passlib.hash import pbkdf2_sha256
 
@@ -33,7 +33,7 @@ class User (MethodView):
         return {"message":"User created successfully"},201
         #return user
     #when you are adding @response you hav to add return user
-    #when you are adding {messag} you don't have to add @response
+    #when you are adding {message} you don't have to add @response
 
     @blp.response(200,Uservalidate(many=True))
     def get(self):
@@ -43,7 +43,7 @@ class User (MethodView):
 
 @blp.route("/register/<int:user_id>")
 class UserDel(MethodView):
-    
+    @jwt_required()
     def delete(self , user_id):
         user = UserModel.query.get_or_404(user_id)#remember that query takes only the primary key to check in the database
         variables.session.delete(user)
@@ -69,8 +69,9 @@ class UserLogin(MethodView):
         ).first()
 
         if user and pbkdf2_sha256.verify(user_data["password"] , user.password):
-            access_token = create_access_token(identity = user.id)
-            return {"access token":access_token}
+            access_token = create_access_token(identity = user.id , fresh=True)
+            refresh_token = create_refresh_token(identity= user.id)
+            return {"access token":access_token , "refresh token": refresh_token}
         
         abort(400 , message="Invalid password or user")
 
@@ -89,4 +90,11 @@ class UserLogout(MethodView):
 
         #Blocklist.add(jwi)
         return({"message":"Logged out successfully"})
-
+    
+@blp.route("/refresh")
+class Refresh(MethodView):
+    @jwt_required(refresh=True)
+    def post(self):
+        current_user = get_jwt_identity()
+        new_token = create_access_token(identity=current_user , fresh = False)
+        return {"access token" : new_token}
